@@ -1,76 +1,207 @@
-# NalcaOS
+# YukiOS
 
-NalcaOS is a custom operating system installation project for Arch Linux. It includes scripts to automate disk partitioning, base system installation, and configuration of a fully functional Linux environment with optimized third-party repositories, multiple desktop environments/window managers, secure boot support, and essential applications out of the box.
+YukiOS is an advanced, performance-focused Arch Linux-based operating system distribution project featuring the **Calamares** graphical installer, a **KDE Plasma 6** desktop environment, optimized CachyOS x86_64-v3 repositories, BlackArch penetration testing tools, pre-installed productivity applications, and automated Infrastructure-as-Code (**Terraform**) deployment.
 
-## Installation & Usage
+---
 
-You can install NalcaOS directly from an Arch Linux live ISO without needing to manually clone the repository beforehand. Ensure you are connected to the internet, then execute one of the following commands:
+## Key Highlights
 
-### Option 1: Quick Install (One-Liner)
+- **Graphical Installer**: Integrated [Calamares](https://calamares.io/) modular installer with a custom TokyoNight theme, brand assets, and multi-kernel initramfs generation.
+- **Desktop Environment**: **KDE Plasma 6** + SDDM with Wayland session support, desktop shortcuts, and root GUI authorization via Xwayland.
+- **Default Applications**:
+  - **Brave Browser** (`brave-bin` via CachyOS)
+  - **Discord** (`discord` via Arch Extra)
+  - **Antigravity IDE** (`antigravity-ide` via custom local repository)
+  - **Spotify** (`spotify` via custom local repository)
+  - **Kitty** (`kitty`), pre-configured as the system-wide default terminal emulator
+- **Multi-Repository Architecture**:
+  - Arch Linux official repositories (`core`, `extra`, `multilib`)
+  - **CachyOS** repositories (`cachyos-v3`, `cachyos-core-v3`, `cachyos-extra-v3`, `cachyos`) with CPU-optimized packages
+  - **BlackArch** security and penetration testing repository
+  - Out-of-the-box **yay** AUR helper
+- **Dual Kernel Support**:
+  - `linux-cachyos-lts` (performance-tuned LTS kernel as primary)
+  - `linux` (official Arch kernel as fallback)
+- **Infrastructure as Code & Virtualization**:
+  - Standalone **Terraform** / **OpenTofu** engine for zero-configuration local VM deployment.
+  - Native QEMU/KVM automation with UEFI OVMF firmware and 1080p display.
+  - CLI management wrapper script (`scripts/manage-vm.sh`).
 
-Run the automated installation script directly using `curl`:
-
-```bash
-curl -sSL https://minio-api.hime-code.xyz/nalcaos/install.sh | bash
-```
-
-### Option 2: Manual Download & Execute
-
-If you prefer to download the installer script and execute it manually:
-
-```bash
-curl -sSL https://minio-api.hime-code.xyz/nalcaos/install.sh -o install.sh
-chmod +x install.sh
-./install.sh
-```
-
-### Option 3: Manual Git Clone & Run
-
-If you have cloned the repository manually within an Arch Linux live media:
-
-```bash
-python3 main.py
-```
-
-The interactive installer will prompt you for your desired username, password, target disk to partition and format, CPU/GPU hardware brands, and your preferred Desktop Environment or Window Manager. Upon completion, the script automatically unmounts the filesystems and reboots your system.
+---
 
 ## Project Structure
 
-- `install.sh`: The automated bootstrap shell script. It downloads the required installation packages directly from the custom MinIO server or seamlessly falls back to cloning the GitHub repository if the server is unreachable, executes `main.py`, and cleans up after installation.
-- `main.py`: The entrypoint script for the Python installer. It prompts for initial user credentials and launches the automated installation routine.
-- `configs/installer.py`: The core installation module containing the OOP `Installer` class. It manages disk partitioning, base system package installation, chroot configuration, third-party mirrors, secure boot signing, and desktop environment deployment.
-- `configs/pacman.py`: Helper script executed inside the chroot environment to finalize package updates and configurations.
-- `mirrors/`: Contains Python modules to set up third-party repositories such as **BlackArch** and **CachyOS**.
-- `binaries/`: Stores pre-compiled binaries (such as `yay` and `PortProton`) for immediate out-of-the-box installation without requiring manual compilation from the AUR during setup.
+```
+YukiOS/
+├── archiso/                    # Archiso Live ISO profile
+│   └── profile/
+│       ├── airootfs/           # Root filesystem overlay for Live ISO & target installation
+│       │   ├── etc/calamares/  # Calamares installer configuration, modules & branding
+│       │   ├── etc/sddm.conf.d/# SDDM autologin configuration
+│       │   ├── etc/skel/       # User skeleton with Desktop application launchers
+│       │   └── usr/local/bin/  # Helper scripts (calamares-autostart, yukios-target-cleanup)
+│       ├── local-repo/         # Local pacman repository for prebuilt AUR packages
+│       ├── packages.x86_64     # Live ISO & Calamares package manifest
+│       ├── pacman.conf         # Archiso pacstrap repository definitions
+│       └── profiledef.sh       # ISO metadata and filesystem permissions
+├── scripts/                    # Automation & helper scripts
+│   ├── build-iso.sh            # Automated ISO build script (with --clean and --run flags)
+│   ├── manage-vm.sh            # Comprehensive CLI manager for the Terraform VM
+│   └── run-qemu.sh             # Direct QEMU+KVM runner with UEFI OVMF support
+├── terraform/                  # Infrastructure-as-Code VM automation
+│   ├── main.tf                 # Terraform root module (detached QEMU engine)
+│   ├── variables.tf            # Configurable VM parameters (RAM, CPU, disk, display)
+│   ├── outputs.tf              # Connection strings, VNC endpoints, SSH forwards
+│   ├── terraform.tfvars.example# Example variable customization file
+│   ├── scripts/qemu-manager.sh # Detached process management engine
+│   └── modules/libvirt/        # Alternative module for Libvirt / KVM server clusters
+├── binaries/                   # Pre-compiled packages and build instructions
+│   ├── built/apps/             # Local archive of built package archives
+│   └── pre-compile-binaries.md # Guide for building PKGBUILDs with makepkg
+├── configs/                    # Legacy / alternative Python CLI installer modules
+│   └── installer.py            # CLI-based Arch Linux installer
+├── BUGS_AND_FIXES.md           # Detailed bug tracking log (BUG-001 through BUG-012)
+├── yukios-calamares-guide.md   # Architectural reference for Calamares on Archiso
+├── todo.md                     # Roadmap and planned improvements
+└── README.md                   # Project documentation
+```
 
-## Technical Details
+---
 
-### Automated Bootstrapper (`install.sh`)
-The bootstrap script makes deploying NalcaOS fast and resilient:
-- **Server Fetch with GitHub Fallback**: Attempts to directly fetch the latest installation assets from the custom MinIO API server (`http://minio-api.hime-code.xyz/nalcaos`). If the homelab/server is unreachable, it automatically falls back to installing `git` via `pacman` and cloning the repository from GitHub.
-- **Cleanup & Reboot**: On successful execution of `main.py`, it removes temporary staging folders, cleanly unmounts `/mnt`, and reboots into your fresh installation.
+## Building the YukiOS Live ISO
 
-### Core Arch Linux Installer (`configs/installer.py`)
-The automated installer executes the standard Arch Linux installation steps programmatically:
+### Prerequisites
+Ensure your build host has `archiso`, `qemu-desktop`, and `edk2-ovmf` installed:
+```bash
+sudo pacman -S --needed archiso qemu-desktop edk2-ovmf
+```
 
-- `configure_pacman()`: Modifies `/etc/pacman.conf` to enable `Color`, `ParallelDownloads`, `Multilib` support, and the hidden `ILoveCandy` easter egg for an improved visual package management experience.
-- `disks()`: Displays available storage devices to the user via `lsblk`. Once chosen, it wipes the drive, creates a 1GB EFI (`fat32`) boot partition and an `ext4` root filesystem using `parted`, and mounts them under `/mnt` and `/mnt/boot`.
-- `install_base()`: Prompts for CPU (Intel/AMD) and GPU (Intel/AMD/NVIDIA) manufacturers to install appropriate microcode and graphics drivers alongside `base`, `linux-firmware`, `base-devel`, network tools, and OpenSSH via `pacstrap`. Automatically generates `/mnt/etc/fstab`.
-- `arch_chroot()`: Configures the newly installed system inside `arch-chroot`:
-  - Sets timezone to `America/Santiago`, syncs the hardware clock, and generates system locales (`en_US.UTF-8`).
-  - Sets hostname to `NalcaOS` and sets root and standard user passwords with `wheel` (sudo) privileges.
-  - **Third-Party Repositories**: Integrates modules from `mirrors/` to configure the **BlackArch** penetration testing repository and the **CachyOS** performance repository, installing the `linux-cachyos-lts` kernel.
-  - **Pre-compiled Software**: Automatically copies over and installs pre-built binaries from `binaries/`, providing the `yay` AUR helper and `PortProton` out of the box.
-  - Configures GRUB for UEFI booting and enables necessary system services (`NetworkManager`, `sshd`).
-- `setup_secureboot()`: Automates UEFI Secure Boot signing using `sbctl`. Generates Secure Boot keys, attempts to enroll them into UEFI Setup Mode, and digitally signs GRUB and kernel images (`vmlinuz-*`).
-- `install_desktop()`: Provides an interactive menu featuring **18 Desktop Environment and Window Manager options**:
-  - **Desktop Environments**: KDE Plasma, GNOME, XFCE, Cinnamon, MATE, LXQt, LXDE, Budgie, Deepin, Pantheon, Enlightenment, Trinity, Cosmic.
-  - **Window Managers (Wayland & X11)**: Hyprland, Sway, River, Wayfire, Labwc, Niri, Cage, Hikari, i3-wm, bspwm, Awesome, xmonad, qtile, dwm, Openbox, IceWM, Fluxbox, Herbstluftwm, Spectrwm, JWM, dk, StumpWM, or a headless (TTY-only) setup.
-  - Dynamically configures and enables the corresponding display manager service (e.g., `sddm`, `gdm`, `lightdm`).
+### Build Command
+Compile the bootable Live ISO using the automated build script:
+```bash
+./scripts/build-iso.sh --clean
+```
 
-## Planned Features & Roadmap
+- Output is generated in the `out/` directory: `out/yukios-<date>-x86_64.iso`.
+- Add `--run` to automatically boot the freshly compiled image in QEMU once the build succeeds:
+  ```bash
+  ./scripts/build-iso.sh --clean --run
+  ```
 
-Check out the additional documentation files in the repository for upcoming initiatives and deployment workflows:
-- [`todo.md`](todo.md): Upcoming features and planned system optimizations.
-- [`mirror-deploy-roadmap.md`](mirror-deploy-roadmap.md): Roadmap and technical guide for custom mirror server deployments.
-- [`nalcaos-calamares-guide.md`](nalcaos-calamares-guide.md): Reference guide for integrating NalcaOS with the Calamares graphical installer framework.
+---
+
+## ISO Architecture & Sizing
+
+The generated YukiOS ISO is approximately **3.9 GB**. The storage footprint is distributed as follows:
+
+| Component | Size on ISO | Details |
+|---|---|---|
+| **Compressed Rootfs (`airootfs.sfs`)** | **~2.4 GB** | `xz`-compressed from an **8.0 GB** uncompressed rootfs containing KDE Plasma 6, Qt6 runtimes, hardware firmware, and heavy default apps: Antigravity IDE (721 MB), Brave Browser (462 MB), Spotify (370 MB), and Kitty (66 MB). |
+| **Boot Images (`/arch/boot/`)** | **~724 MB** | Contains three full initramfs images (`linux-cachyos-lts`, `linux`, and fallback) plus kernel binaries. |
+| **UEFI Partition (`efiboot.img`)** | **~727 MB** | A FAT image duplicate of the `/arch/boot/` files required by standard UEFI firmware to boot. |
+| **Bootloaders & Metadata** | **~50 MB** | GRUB, Syslinux, and ISO filesystem metadata. |
+
+---
+
+## Testing & Virtual Machine Deployment
+
+YukiOS provides multiple ways to test and deploy virtual machines:
+
+### Method 1: The Unified VM Manager (`scripts/manage-vm.sh`)
+The recommended way to manage the VM using Terraform without needing to write Terraform commands manually:
+
+```bash
+# Deploy and start installer VM in a GTK desktop window
+./scripts/manage-vm.sh up
+
+# Deploy headlessly with VNC server accessible at 127.0.0.1:5900
+./scripts/manage-vm.sh up install vnc
+
+# Boot the installed system directly from the virtual hard drive (post-install)
+./scripts/manage-vm.sh up installed
+
+# Check execution status and running PID
+./scripts/manage-vm.sh status
+
+# Follow QEMU execution logs in real time
+./scripts/manage-vm.sh logs -f
+
+# SSH into the running guest (forwarded to localhost:2222)
+./scripts/manage-vm.sh ssh
+
+# Launch local VNC client
+./scripts/manage-vm.sh vnc
+
+# Safely shut down the VM (preserves virtual disk)
+./scripts/manage-vm.sh down
+```
+
+### Method 2: Native Terraform Commands
+You can also interact directly with Terraform:
+
+```bash
+cd terraform
+terraform init
+terraform apply
+```
+
+To customize RAM, CPU cores, or display backend, create a `terraform.tfvars`:
+```hcl
+vm_name      = "yukios-dev"
+memory       = "8G"
+cpu_cores    = 6
+display_type = "gtk"      # "gtk", "vnc", or "none"
+boot_mode    = "install"  # "install" or "installed"
+```
+
+To destroy the VM:
+```bash
+terraform destroy
+```
+*(The virtual disk is preserved by default to prevent accidental data loss. Set `delete_disk_on_destroy = true` in `terraform.tfvars` if you wish to remove the disk image upon destroy).*
+
+### Method 3: Direct QEMU Script
+Run QEMU directly without Terraform:
+```bash
+# Boot Live ISO installer
+./scripts/run-qemu.sh
+
+# Boot installed system from the virtual disk
+./scripts/run-qemu.sh "" installed
+```
+
+---
+
+## Installation Walkthrough
+
+1. **Boot into the Live Desktop**: The ISO automatically starts SDDM and logs in as `liveuser` into a KDE Plasma 6 desktop session.
+2. **Calamares Installer**: The installer will launch automatically within a few seconds, or you can double-click **"Install YukiOS"** on the desktop.
+3. **Partitioning**: Choose manual partitioning or erase disk. Calamares will format the EFI system partition and root partition.
+4. **User & System Setup**: Create your user account and choose your locale/keyboard layout.
+5. **System Finalization**: Calamares unpacks the system, compiles initramfs images for both kernels via `mkinitcpio -P`, initializes the Pacman keyring (`archlinux`, `cachyos`, `blackarch`), and purges live-only autologin services.
+6. **Reboot**: Shut down the VM and boot with `boot_mode = "installed"` or `./scripts/manage-vm.sh up installed`.
+
+---
+
+## Documentation & Troubleshooting
+
+- **[YukiOS Calamares Integration Guide](yukios-calamares-guide.md)**: Deep dive into the Calamares module sequence, configuration files, branding descriptors, and target system cleanup.
+- **[Bugs & Fixes Log](BUGS_AND_FIXES.md)**: Detailed reports on bugs discovered and resolved during development (BUG-001 through BUG-012), including keyring initialization, missing repositories, kernel initramfs configuration, and Wayland root execution.
+- **[Terraform Documentation](terraform/README.md)**: Full parameter reference, input variables, outputs, and instructions for the Libvirt cluster module.
+- **[Pre-compiling Binaries Guide](binaries/pre-compile-binaries.md)**: Instructions for compiling AUR packages with `makepkg` and adding them to the local repository.
+
+---
+
+## Roadmap
+
+Check [`todo.md`](todo.md) for tracked roadmap tasks and planned features:
+- [x] Automatic local XAMPP configuration script.
+- [x] Desktop environment selection.
+- [x] `yay` AUR helper pre-installed.
+- [x] Pre-compiled PortProton package integration.
+- [x] BlackArch penetration testing repository.
+- [x] CachyOS LTS kernel integration.
+- [x] Calamares graphical installer with TokyoNight branding and KDE Plasma 6 Live ISO.
+- [x] Virtualization tooling and automated Terraform deployment.
+- [ ] Development language toolchains (Rust, Node.js, Go, Python).
+- [ ] Additional developer IDE profiles and system customizers.
