@@ -1,12 +1,34 @@
 # Folders
-binaries/to-build
+binaries/to-build/
 nalcaos/
+out/
+/out/
+*.qcow2
+*.iso
 
-# File extensions
-*txt
-*.pycbinaries/built/download_mirror.py
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large packages (>100MB exceeds GitHub limit)
+*.pkg.tar.zst
+!binaries/built/apps/portproton.pkg.tar.zst
+!binaries/built/apps/yay.pkg.tar.zst
+archiso/profile/local-repo/*.pkg.tar.zst
 
 # Files
 install.sh
 binaries/built/cachy-mirrors.txt
 binaries/built/download_mirror.py
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+*.tfvars
+!*.tfvars.example
+terraform/logs/
+terraform/sockets/
+*.pid

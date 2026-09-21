@@ -1,0 +1,16 @@
+====================================================
+Welcome to the YukiOS Live Installation Environment!
+====================================================
+
+To launch the graphical Calamares installer:
+  - Click 'Install YukiOS' on the desktop, OR
+  - Run: sudo calamares (or yukios-calamares)
+
+For terminal installation:
+  - Run: yukios-installer
+
+Network:
+  - Ethernet connects automatically via NetworkManager.
+  - For Wi-Fi: use 'nmcli dev wifi connect <SSID> password <PASS>'
+    or the system tray network icon.
+====================================================

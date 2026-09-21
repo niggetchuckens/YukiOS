@@ -1,0 +1,14 @@
+#!/bin/bash
+# Pre-session desktop configuration
+/usr/local/bin/trust-desktop-launchers &
+
+# Automatically set display resolution to 1920x1080 if supported
+if command -v xrandr &>/dev/null; then
+    output=$(xrandr | grep " connected" | cut -d' ' -f1 | head -n 1)
+    if [ -n "$output" ]; then
+        xrandr --output "$output" --mode 1920x1080 2>/dev/null || \
+        xrandr --output "$output" --mode 1600x900 2>/dev/null || \
+        xrandr --output "$output" --mode 1366x768 2>/dev/null || \
+        xrandr --output "$output" --mode 1280x720 2>/dev/null || true
+    fi
+fi

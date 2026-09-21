@@ -1,0 +1,13 @@
+[Unit]
+Description=Initialize Pacman Keyring if missing
+ConditionPathExists=!/etc/pacman.d/gnupg/trustdb.gpg
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/pacman-key --init
+ExecStart=/usr/bin/pacman-key --populate
+
+[Install]
+WantedBy=multi-user.target

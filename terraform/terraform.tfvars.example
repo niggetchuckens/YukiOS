@@ -1,0 +1,22 @@
+# terraform/terraform.tfvars.example
+# Copy this file to terraform.tfvars to customize your deployment:
+#   cp terraform.tfvars.example terraform.tfvars
+
+vm_name          = "yukios-dev-vm"
+memory           = "4G"
+cpu_cores        = 4
+disk_size        = "25G"
+disk_image_path  = "yukios-disk.qcow2"
+boot_mode        = "install"   # Use "install" for Live ISO boot, "installed" after installation
+display_type     = "gtk"       # "gtk" (GUI window), "vnc" (headless with VNC), or "none"
+vnc_port         = 5900
+ssh_host_port    = 2222
+enable_kvm       = true
+resolution_width = 1920
+resolution_height = 1080
+
+# Keep the disk when running 'terraform destroy' to preserve installed system
+delete_disk_on_destroy = false
+
+# Optional: explicitly override ISO path if not using the latest in out/
+# iso_path = "/home/hime/code/YukiOS/out/yukios-2026.09.21-x86_64.iso"
