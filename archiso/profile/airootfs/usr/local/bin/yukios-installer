@@ -1,0 +1,4 @@
+#!/bin/bash
+# Terminal installer for YukiOS
+cd /opt/yukios-installer
+exec python3 main.py "$@"

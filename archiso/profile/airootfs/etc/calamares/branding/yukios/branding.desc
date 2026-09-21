@@ -1,0 +1,34 @@
+---
+componentName: yukios
+welcomeStyleCalamares: false
+welcomeExpandingLogo: true
+windowExpanding: normal
+windowSize: 800px,520px
+windowPlacement: center
+
+strings:
+    productName:         YukiOS
+    shortProductName:    YukiOS
+    version:             0.1-alpha 
+    shortVersion:        0.1-alpha
+    versionedName:       YukiOS 0.1-alpha
+    shortVersionedName:  YukiOS 0.1-alpha
+    bootloaderEntryName: YukiOS
+    productUrl:          https://github.com/niggetchuckens/YukiOS
+    supportUrl:          https://github.com/niggetchuckens/YukiOS/issues
+    knownIssuesUrl:      https://github.com/niggetchuckens/YukiOS/issues
+    releaseNotesUrl:     https://github.com/niggetchuckens/YukiOS
+
+images:
+    productLogo:         "logo.png"
+    productIcon:         "icon.png"
+    productWelcome:      "welcome.png"
+
+style:
+   sidebarBackground:    "#1A1B26"
+   sidebarText:          "#A9B1D6"
+   sidebarTextSelect:    "#7AA2F7"
+   sidebarTextHighlight: "#BB9AF7"
+
+slideshow:               "show.qml"
+slideshowAPI: 2

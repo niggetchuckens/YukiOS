@@ -1,0 +1,13 @@
+#!/bin/bash
+# Automatically trust and authorize desktop launchers on login for XFCE
+if [ -d "$HOME/Desktop" ]; then
+    chmod +x "$HOME"/Desktop/*.desktop 2>/dev/null || true
+    for f in "$HOME"/Desktop/*.desktop; do
+        [ -f "$f" ] || continue
+        gio set -t string "$f" metadata::trusted true 2>/dev/null || true
+        checksum="$(sha256sum "$f" 2>/dev/null | cut -d' ' -f1)"
+        if [ -n "$checksum" ]; then
+            gio set -t string "$f" metadata::xfce-exe-checksum "$checksum" 2>/dev/null || true
+        fi
+    done
+fi

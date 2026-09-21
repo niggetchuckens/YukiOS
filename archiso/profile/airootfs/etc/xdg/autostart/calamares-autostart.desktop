@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=YukiOS Installer Autostart
+Comment=Launch Calamares on Live ISO boot
+Exec=/usr/local/bin/calamares-autostart
+Icon=calamares
+Terminal=false
+StartupNotify=true

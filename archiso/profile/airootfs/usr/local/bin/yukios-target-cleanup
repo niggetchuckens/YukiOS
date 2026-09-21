@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Cleanup live-environment configs and prepare installed YukiOS system
+set -e
+
+echo "[YukiOS-Cleanup] Removing live Archiso initcpio configuration..."
+rm -f /etc/mkinitcpio.conf.d/archiso.conf
+
+if [ -f /etc/mkinitcpio.d/linux-target.preset ]; then
+    echo "[YukiOS-Cleanup] Activating target linux.preset..."
+    mv -f /etc/mkinitcpio.d/linux-target.preset /etc/mkinitcpio.d/linux.preset
+fi
+
+echo "[YukiOS-Cleanup] Initializing Pacman keyring on target system..."
+mkdir -p /etc/pacman.d/gnupg
+chmod 755 /etc/pacman.d/gnupg
+chown -R root:root /etc/pacman.d/gnupg
+
+pacman-key --init || true
+pacman-key --populate archlinux cachyos blackarch 2>/dev/null || pacman-key --populate || true
+
+chmod 755 /etc/pacman.d/gnupg
+find /etc/pacman.d/gnupg -type f -exec chmod 644 {} + 2>/dev/null || true
+find /etc/pacman.d/gnupg -type d -exec chmod 755 {} + 2>/dev/null || true
+[ -d /etc/pacman.d/gnupg/private-keys-v1.d ] && chmod 700 /etc/pacman.d/gnupg/private-keys-v1.d || true
+[ -f /etc/pacman.d/gnupg/secring.gpg ] && chmod 600 /etc/pacman.d/gnupg/secring.gpg || true
+chown -R root:root /etc/pacman.d/gnupg
+
+echo "[YukiOS-Cleanup] Removing live autologin configs..."
+rm -f /etc/systemd/system/getty@tty1.service.d/autologin.conf
+rm -f /etc/sddm.conf.d/autologin.conf
+rm -rf /etc/lightdm
+rm -f /etc/sudoers.d/liveuser
+
+echo "[YukiOS-Cleanup] Removing live installer launchers and autostart entries..."
+rm -f /etc/xdg/autostart/calamares-autostart.desktop
+rm -f /etc/xdg/autostart/trust-desktop.desktop
+rm -f /etc/skel/Desktop/calamares.desktop
+rm -f /home/*/Desktop/calamares.desktop 2>/dev/null || true
+
+echo "[YukiOS-Cleanup] Removing live-only services..."
+rm -f /etc/systemd/system/pacman-init.service \
+      /etc/systemd/system/choose-mirror.service \
+      /etc/systemd/system/livecd-alsa-unmuter.service \
+      /etc/systemd/system/livecd-talk.service \
+      /etc/systemd/system/etc-pacman.d-gnupg.mount \
+      /etc/systemd/journald.conf.d/volatile-storage.conf \
+      /etc/systemd/resolved.conf.d/archiso.conf \
+      /etc/systemd/logind.conf.d/do-not-suspend.conf \
+      /etc/ssh/sshd_config.d/10-archiso.conf
+
+# Self-removal
+rm -f /usr/local/bin/yukios-target-cleanup
+
+echo "[YukiOS-Cleanup] Complete."
+exit 0

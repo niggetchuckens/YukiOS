@@ -1,0 +1,27 @@
+/* YukiOS Calamares Theme */
+QDialogButtonBox {
+    dialogbuttonbox-buttons-have-icons: 0;
+}
+
+QWidget {
+    font-family: "Noto Sans", "DejaVu Sans", sans-serif;
+    color: #c0caf5;
+    background-color: #1a1b26;
+}
+
+QPushButton {
+    background-color: #24283b;
+    border: 1px solid #414868;
+    border-radius: 4px;
+    padding: 6px 14px;
+    color: #c0caf5;
+}
+
+QPushButton:hover {
+    background-color: #414868;
+}
+
+QPushButton:pressed {
+    background-color: #7aa2f7;
+    color: #15161e;
+}
