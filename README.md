@@ -1,6 +1,6 @@
-# NalcaOS
+# YukiOS
 
-NalcaOS is a custom operating system installation project. It includes scripts to automate the installation and configuration of a fully functional Linux environment with selected tools, desktop environments, and optimizations out of the box.
+YukiOS is a custom operating system installation project. It includes scripts to automate the installation and configuration of a fully functional Linux environment with selected tools, desktop environments, and optimizations out of the box.
 
 ## Project Structure
 
@@ -22,7 +22,7 @@ The Python installer automates an Arch Linux installation using a series of defi
 - `de_select()`: Provides an interactive menu for the user to choose their preferred Desktop Environment or Window Manager. Options include: KDE Plasma, GNOME, XFCE, Hyprland, Sway, or a headless (TTY-only) setup. It maps the selection to the corresponding Arch packages and display manager service (e.g., `sddm`, `gdm`, `lightdm`).
 - `base_config()`: The final overarching setup function that handles the `arch-chroot` stage. It manages:
   - Setting the timezone to `America/Santiago` and synchronizing the hardware clock.
-  - Setting the system locales to `en_US.UTF-8` and setting the hostname to `NalcaOS`.
+  - Setting the system locales to `en_US.UTF-8` and setting the hostname to `YukiOS`.
   - Creating a root password and setting up a new standard user with `wheel` (sudo) privileges.
   - **Third-party Repositories**: Invoking the Python modules from the `mirrors/` folder to install the **BlackArch** penetration testing repository and the **CachyOS** repository. It then installs the optimized `linux-cachyos-lts` kernel.
   - **Bootloader**: Installing `grub` and `efibootmgr`, then configuring GRUB for UEFI.
@@ -42,7 +42,7 @@ This script serves to bootstrap a machine with additional user-space tools, leve
 ## Usage
 
 ### Running the Arch Linux Installer
-To install NalcaOS using the Python installer, boot into an Arch Linux live ISO, ensure you are connected to the internet, and execute:
+To install YukiOS using the Python installer, boot into an Arch Linux live ISO, ensure you are connected to the internet, and execute:
 
 ```bash
 python installer.py
@@ -56,9 +56,53 @@ If you are on a Debian-based system (or adapting the script for Arch), you can r
 sudo ./install.sh
 ```
 
+### Building and Testing the Calamares Live ISO
+
+YukiOS includes an Archiso profile integrated with the **Calamares** graphical installer and a **KDE Plasma 6** live desktop environment (with Brave, Discord, Antigravity IDE, Spotify, and Kitty pre-installed).
+
+#### 1. Build the ISO
+```bash
+./scripts/build-iso.sh --clean
+```
+This script compiles the Live ISO into the `out/` directory (e.g., `out/yukios-<date>-x86_64.iso`). Use `--run` to automatically launch QEMU upon build completion.
+
+#### 2. Test in QEMU + KVM
+```bash
+./scripts/run-qemu.sh
+```
+This script automatically creates a 25GB virtual disk (`test-vm-disk.qcow2`), enables KVM acceleration and UEFI OVMF firmware, and boots into the live environment. You can test partitioning and installing YukiOS via Calamares.
+
+To boot into the installed system directly from the virtual hard drive:
+```bash
+./scripts/run-qemu.sh "" installed
+```
+
+#### 3. Automated VM Deployment with Terraform
+YukiOS provides complete Infrastructure-as-Code automation in the [`terraform/`](terraform/) directory.
+
+You can manage the VM directly using the CLI wrapper script:
+```bash
+./scripts/manage-vm.sh up                 # Deploy and start installer VM (GTK desktop window)
+./scripts/manage-vm.sh up install vnc     # Deploy and start headlessly with VNC at 127.0.0.1:5900
+./scripts/manage-vm.sh up installed       # Boot installed system from virtual hard drive
+./scripts/manage-vm.sh status             # Check VM running status and PID
+./scripts/manage-vm.sh logs -f            # Follow execution logs
+./scripts/manage-vm.sh ssh                # SSH into guest (liveuser@localhost:2222)
+./scripts/manage-vm.sh down               # Gracefully stop the VM (preserves disk)
+```
+
+Or using native Terraform commands:
+```bash
+cd terraform
+terraform init
+terraform apply
+```
+
+See [`terraform/README.md`](terraform/README.md) for full configuration variables (display modes, VNC, SSH port forwarding, and Libvirt module).
+
 ## Planned Features
 
 Check the [`todo.md`](todo.md) file for upcoming features and planned improvements, such as:
 - Automatic local XAMPP configuration script.
 - Pre-compiling PortProton for system-wide installation.
-- Installation of virtualization tools, programming languages, and IDEs.
+- Installation of programming languages and additional IDEs.

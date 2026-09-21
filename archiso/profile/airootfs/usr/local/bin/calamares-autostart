@@ -1,0 +1,11 @@
+#!/bin/bash
+# Automatically launch Calamares when booting into the live environment
+if [ -d /run/archiso ]; then
+    # Give the KDE desktop and panel a couple of seconds to initialize
+    sleep 3
+    if command -v xhost &>/dev/null; then
+        xhost +si:localuser:root 2>/dev/null || xhost + 2>/dev/null || true
+    fi
+    export QT_QPA_PLATFORM=xcb
+    exec sudo -E QT_QPA_PLATFORM=xcb calamares
+fi

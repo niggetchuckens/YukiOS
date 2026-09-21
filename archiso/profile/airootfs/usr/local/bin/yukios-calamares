@@ -1,0 +1,12 @@
+#!/bin/bash
+# Launcher script for Calamares on YukiOS Live ISO
+if command -v xhost &>/dev/null; then
+    xhost +si:localuser:root 2>/dev/null || xhost + 2>/dev/null || true
+fi
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+
+if [ "$EUID" -ne 0 ]; then
+    exec sudo -E QT_QPA_PLATFORM="$QT_QPA_PLATFORM" calamares "$@"
+else
+    exec calamares "$@"
+fi

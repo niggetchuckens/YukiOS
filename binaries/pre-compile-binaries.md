@@ -1,6 +1,6 @@
-# Pre-Compiling Binaries for NalcaOS Installer
+# Pre-Compiling Binaries for YukiOS Installer
 
-When attempting to include pre-compiled binaries (like AUR packages) for the NalcaOS installer, you might encounter "command not found", "file not found", or "missing dependencies" errors. This typically happens for a few reasons:
+When attempting to include pre-compiled binaries (like AUR packages) for the YukiOS installer, you might encounter "command not found", "file not found", or "missing dependencies" errors. This typically happens for a few reasons:
 
 1. The package file hasn't been built yet.
 2. The compiled package has a version string in its name (e.g., `portproton-1.7.3-1-x86_64.pkg.tar.zst`), but the installer script expects a generic name (e.g., `portproton.pkg.tar.zst`).

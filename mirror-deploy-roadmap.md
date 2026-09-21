@@ -1,4 +1,4 @@
-# NalcaOS Package Repository & Build Infrastructure
+# YukiOS Package Repository & Build Infrastructure
 
 This document outlines the complete workflow for establishing a secure, high-performance pacman package repository, scaling from local homelab testing to a production-ready distribution infrastructure.
 
@@ -135,7 +135,7 @@ Save as `/usr/local/bin/deploy-pkg` and make executable (`chmod +x /usr/local/bi
 
 ```bash
 #!/bin/bash
-# deploy-pkg.sh - Automates NalcaOS repository updates
+# deploy-pkg.sh - Automates YukiOS repository updates
 
 REPO_DIR="/srv/http/nalcaos"
 DB_NAME="nalcaos.db.tar.gz"
